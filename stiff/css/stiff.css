@@ -1,0 +1,9 @@
+.stiff {background-color: white; border: 1px solid darkgray; font-family: sans-serif; font-size: 16px;}
+.stiff path, .stiff polygon {stroke-linecap: round; stroke-linejoin: round;}
+.stiff text {fill: #333;}
+.stiff .axis, .stiff .axis-tick, .stiff .polygon {stroke: #333; stroke-width: 2px;}
+.stiff .axis-label {text-anchor: middle; font-size: 16px;}
+.stiff .axis-tick-label {text-anchor: middle; font-size: 14px;}
+.stiff .valence-label {text-anchor: middle; font-weight: bold; fill: #444; font-size: 16px;}
+.stiff .polygon {fill: lightblue; fill-opacity: 0.8;}
+.stiff .point-label {font-size: 15px;}

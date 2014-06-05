@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Stiff diagram</title>
+    <link rel="stylesheet" href="css/stiff.css" />
+    <style>
+      body {background-color: lightgrey;}
+    </style>
+  </head>
+  <body>
+    <div id="stiff"></div>
+    <script src="../core/js/ions.js"></script>
+    <script src="js/stiff.js"></script>
+    <script>
+      var stiffDiagram = new UQ3DWA.StiffDiagram('stiff',
+        ['Na', 'Ca', 'Mg', 'K', 'Cl', 'HCO3', 'SO4', 'CO3'],
+        {'Ca': 14, 'Mg': 6.9, 'Na': 25, 'K': 4, 'Cl': 26, 'SO4': 4.6, 'CO3': 0.4, 'HCO3': 106}
+      );
+    </script>
+  </body>
+</html>

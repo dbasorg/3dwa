@@ -6,3 +6,4 @@ Repository contents:
 
 * [core](core): Core JavaScript files used by other components.
 * [piper](piper): Piper Diagram implemented using JavaScript/SVG/CSS.
+* [stiff](stiff): Stiff Diagram implemented using JavaScript/SVG/CSS.
