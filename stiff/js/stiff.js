@@ -1,9 +1,4 @@
 (function(UQ3DWA) {
-  /** Performs "map" on object, returning a new object with same keys and mapped values. */
-  function mapObject(o, f) {
-    return Object.keys(o).reduce(function(a, k) {a[k] = f(o[k], k); return a;}, {});
-  }
-
   /**
    * @constructor
    * @param {string} id - id for container element.
@@ -16,10 +11,10 @@
     }
     var that = this;
 
-    var ionObj = mapObject(conc, function(v, sym) {return UQ3DWA.IonFactory.get(sym);});
+    var ionObj = ions.reduce(function(a, sym) {a[sym] = UQ3DWA.IonFactory.get(sym); return a;}, {});
     var cations = ions.filter(function(sym) {return ionObj[sym].getValence() > 0;});
     var anions = ions.filter(function(sym) {return ionObj[sym].getValence() < 0;});
-    var meqL = mapObject(conc, function(v, sym) {return ionObj[sym].getMeqL(conc[sym]);});
+    var meqL = ions.reduce(function(a, sym) {a[sym] = ionObj[sym].getMeqL(conc[sym]); return a;}, {});
     var maxMeqL = Object.keys(meqL).reduce(function(a, k) {return Math.max(a, meqL[k]);}, 0);
 
     var svgNamespaceURI = 'http://www.w3.org/2000/svg';
@@ -111,7 +106,7 @@
       );
       stiff.appendChild(vertAxis);
     })();
- 
+
     function pointCreator(horzMult) {
       var vertAxisPaddedOffsetY = horzAxisY + (vertAxisPaddingTop * vertAxisHeight);
       var vertAxisInnerHeight = vertAxisHeight * (1 - vertAxisPaddingTop - vertAxisPaddingBottom);

@@ -1,9 +1,4 @@
 (function(UQ3DWA) {
-  /** Performs "map" on object, returning a new object with same keys and mapped values. */
-  function mapObject(o, f) {
-    return Object.keys(o).reduce(function(a, k) {a[k] = f(o[k], k); return a;}, {});
-  }
-
   /**
    * @constructor
    * @param {string} id - id for container element.
@@ -16,6 +11,8 @@
         throw new Error('Constructor called as a function');
     }
     var that = this;
+
+    var ions = ['Ca', 'Mg', 'Na', 'K', 'Cl', 'SO4', 'CO3', 'HCO3'];
 
     var piperWidth = 800;
     var piperHeight = 700;
@@ -192,18 +189,17 @@
     createTriangleChart('anion', anionTranslateX, triangleTranslateY, '← CO3 + HCO3', '← SO4', 'Cl →');
 
     function plotConcentrations(conc) {
-      var ion = mapObject(conc, function(v, sym) {return UQ3DWA.IonFactory.get(sym);});
-      var meqL = mapObject(conc, function(v, sym) {return ion[sym].getMeqL(conc[sym]);});
-      var cationTotal = Object.keys(meqL)
-        .filter(function(sym) {return ion[sym].getValence() > 0;})
-        .reduce(function(acc, sym) {return acc + meqL[sym];}, 0);
-      var anionTotal = Object.keys(meqL)
-        .filter(function(sym) {return ion[sym].getValence() < 0;})
-        .reduce(function(acc, sym) {return acc + meqL[sym];}, 0);
+      var ionObj = ions.reduce(function(a, sym) {a[sym] = UQ3DWA.IonFactory.get(sym); return a;}, {});
+      var cations = ions.filter(function(sym) {return ionObj[sym].getValence() > 0;});
+      var anions = ions.filter(function(sym) {return ionObj[sym].getValence() < 0;});
+      var meqL = ions.reduce(function(a, sym) {a[sym] = ionObj[sym].getMeqL(conc[sym]); return a;}, {});
 
-      var proportion = mapObject(meqL, function(v, sym) {
-        return meqL[sym] / ((ion[sym].getValence() > 0) ? cationTotal : anionTotal);
-      });
+      var cationTotal = cations.reduce(function(a, sym) {return a + meqL[sym];}, 0);
+      var anionTotal = anions.reduce(function(a, sym) {return a + meqL[sym];}, 0);
+
+      var proportion = {};
+      cations.reduce(function(a, sym) {a[sym] = meqL[sym] / cationTotal; return a;}, proportion);
+      anions.reduce(function(a, sym) {a[sym] = meqL[sym] / anionTotal; return a;}, proportion)
 
       var color = 'hsl(' + Math.random() * 360 + ', 100%, 45%)';
 
