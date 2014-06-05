@@ -14,37 +14,41 @@
 
     var ions = ['Ca', 'Mg', 'Na', 'K', 'Cl', 'SO4', 'CO3', 'HCO3'];
 
+    var svgNamespaceURI = 'http://www.w3.org/2000/svg';
+    var xlinkNamespaceURI = 'http://www.w3.org/1999/xlink';
+    var xlinkNamespacePrefix = 'xlink';
     var piperWidth = 800;
     var piperHeight = 700;
-
-    var piper = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    piper.setAttribute('class','piper');
-    piper.setAttribute('width', piperWidth);
-    piper.setAttribute('height', piperHeight);
-    piper.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-    piper.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-
     var triangleWidth = 300;
     var triangleTranslateY = 350;
     var triangleBaseY = triangleWidth;
     var triangleHeight = (Math.tan(Math.PI / 3) * (triangleWidth / 2));
     var triangleCentreMargin = 50;
+    var numGridIntervals = 10;
+    var axisLabelMargin = 20;
+    var pointRadius = 5;
+
+    var piper = document.createElementNS(svgNamespaceURI, 'svg');
+    piper.setAttribute('class','piper');
+    piper.setAttribute('width', piperWidth);
+    piper.setAttribute('height', piperHeight);
+    piper.setAttribute('xmlns', svgNamespaceURI);
+    piper.setAttribute('xmlns:xlink', xlinkNamespaceURI);
 
     // We use a for-loop to create one set of grid lines fitting a triangle;
     // arbitrarily, this is the set drawn from the base upward to the right side;
     // we put these lines into an SVG symbol element and re-use it by flipping and
     // rotating to generate all lines for the triangles and top/bottom of the diamond.
     (function createTriangleGridRight() {
-      var numGridIntervals = 10;
       var gridIntervalWidth = triangleWidth / numGridIntervals;
-      var triangleGridRight = document.createElementNS('http://www.w3.org/2000/svg', 'symbol');
+      var triangleGridRight = document.createElementNS(svgNamespaceURI, 'symbol');
       triangleGridRight.setAttribute('id', 'triangle-grid-right');
       for (var i = 0; i <= numGridIntervals; i++) (function() {
         var x1 = i * gridIntervalWidth;
         var y1 = triangleBaseY;
         var x2 = x1 + ((triangleWidth - x1) / 2);
         var y2 = y1 - Math.tan(Math.PI / 3) * (x2 - x1);
-        var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        var path = document.createElementNS(svgNamespaceURI, 'path');
         path.setAttribute('class', 'grid');
         path.setAttribute('d', 'M ' + x1 + ',' + y1 + ' ' + 'L ' + x2 + ',' + y2);
         triangleGridRight.appendChild(path);
@@ -53,8 +57,8 @@
     })();
 
     function useTriangleGridRight(parentElem, rotation, flipY) {
-      var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-      use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#triangle-grid-right');
+      var use = document.createElementNS(svgNamespaceURI, 'use');
+      use.setAttributeNS(xlinkNamespaceURI, xlinkNamespacePrefix + ':href', '#triangle-grid-right');
       var transforms = [];
       if (flipY) (function() {
         var cx = triangleWidth / 2;
@@ -72,7 +76,6 @@
       parentElem.appendChild(use);
     }
 
-    var axisLabelMargin = 20;
     var leftAxisLabelMarginX = Math.cos(Math.PI / 6) * axisLabelMargin;
     var leftAxisLabelX = ((Math.cos(Math.PI / 3) * triangleWidth) / 2) - leftAxisLabelMarginX;
     var rightAxisLabelX = triangleWidth - leftAxisLabelX;
@@ -80,7 +83,7 @@
     var topAxisLabelY = triangleBaseY - ((Math.sin(Math.PI / 3) * triangleWidth) / 2) - topAxisLabelMarginY;
     var bottomAxisLabelY = (2 * triangleBaseY) - topAxisLabelY;
     function createAxisLabel(parentElem, x, y, rotation, text) {
-      var textElem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      var textElem = document.createElementNS(svgNamespaceURI, 'text');
       textElem.setAttribute('class', 'axis-label')
       textElem.setAttribute('x', x)
       textElem.setAttribute('y', y)
@@ -99,13 +102,13 @@
       - triangleHeight                                 // go up height of diamond bottom half triangle
       - triangleBaseY;                                 // go up height of sqaure enclosing top half of diamond
     (function createDiamondField() {
-      var diamondField = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      var diamondField = document.createElementNS(svgNamespaceURI, 'g');
       diamondField.setAttribute('class', 'diamond-field');
       diamondField.setAttribute('transform', 'translate(' + diamondFieldTranslateX + ',' + diamondFieldTranslateY + ')');
-      var diamond = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      var diamond = document.createElementNS(svgNamespaceURI, 'g');
       diamond.setAttribute('class', 'diamond');
       (function createDiamondGrid() {
-        var diamondGrid = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var diamondGrid = document.createElementNS(svgNamespaceURI, 'g');
         diamondGrid.setAttribute('id', 'diamond-grid');
         useTriangleGridRight(diamondGrid, 0);
         useTriangleGridRight(diamondGrid, 120);
@@ -120,7 +123,7 @@
         var baseY = triangleBaseY + triangleHeight;
         var midY = triangleBaseY;
         var midX = leftX + ((rightX - leftX) / 2);
-        var diamondOutline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        var diamondOutline = document.createElementNS(svgNamespaceURI, 'path');
         diamondOutline.setAttribute('class', 'outline');
         diamondOutline.setAttribute('d',
           'M ' + leftX + ',' + midY + ' ' +
@@ -140,11 +143,11 @@
     })();
 
     (function createTriangleSymbol() {
-      var triangle = document.createElementNS('http://www.w3.org/2000/svg', 'symbol');
+      var triangle = document.createElementNS(svgNamespaceURI, 'symbol');
       triangle.setAttribute('id', 'triangle');
       triangle.setAttribute('class', 'triangle');
       (function createTriangleGrid() {
-        var triangleGrid = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var triangleGrid = document.createElementNS(svgNamespaceURI, 'g');
         triangleGrid.setAttribute('id', 'triangle-grid');
         useTriangleGridRight(triangleGrid, 0);
         useTriangleGridRight(triangleGrid, 120);
@@ -156,7 +159,7 @@
         var rightX = leftX + triangleWidth;
         var topY = triangleBaseY - triangleHeight;
         var midX = leftX + ((rightX - leftX) / 2);
-        var triangleOutline = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        var triangleOutline = document.createElementNS(svgNamespaceURI, 'path');
         triangleOutline.setAttribute('class', 'outline');
         triangleOutline.setAttribute('d',
           'M ' + leftX + ',' + triangleBaseY + ' ' +
@@ -170,11 +173,11 @@
     })();
 
     function createTriangleChart(className, translateX, translateY, leftLabel, rightLabel, baseLabel) {
-      var triangleChart = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      var triangleChart = document.createElementNS(svgNamespaceURI, 'g');
       triangleChart.setAttribute('class', className);
       triangleChart.setAttribute('transform', 'translate(' + translateX + ',' + translateY + ')');
-      var use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
-      use.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#triangle');
+      var use = document.createElementNS(svgNamespaceURI, 'use');
+      use.setAttributeNS(xlinkNamespaceURI, xlinkNamespacePrefix + ':href', '#triangle');
       triangleChart.appendChild(use);
       var baseLabelX = triangleWidth / 2;
       var baseLabelY = triangleBaseY + axisLabelMargin;
@@ -204,10 +207,10 @@
       var color = 'hsl(' + Math.random() * 360 + ', 100%, 45%)';
 
       function createDataPoint(x, y) {
-        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        var circle = document.createElementNS(svgNamespaceURI, 'circle');
         circle.setAttribute('class', 'data-point');
         circle.setAttribute('fill', color);
-        circle.setAttribute('r', 5);
+        circle.setAttribute('r', pointRadius);
         circle.setAttribute('cx', x);
         circle.setAttribute('cy', y);
         piper.appendChild(circle);
