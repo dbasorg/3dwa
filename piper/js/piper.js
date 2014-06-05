@@ -1,63 +1,8 @@
 (function(UQ3DWA) {
-  /** Converts angle in degrees to radians. */
-  function deg2rad(deg) {
-    return deg * Math.PI / 180;
-  }
-
   /** Performs "map" on object, returning a new object with same keys and mapped values. */
   function mapObject(o, f) {
     return Object.keys(o).reduce(function(a, k) {a[k] = f(o[k], k); return a;}, {});
   }
-
-  /**
-   * @constructor
-   * @param {string} symbol - Chemical symbol (e.g. HCO3).
-   * @param {string} name - Chemical name (e.g. Bicarbonate).
-   * @param {number} valence - Electrical charge (e.g. -1).
-   * @param {number} formulaWeight - Sum of atomic weights (e.g. 61.016).
-   */
-  UQ3DWA.Ion = function(symbol, name, valence, formulaWeight) {
-    if (!(this instanceof UQ3DWA.Ion)) {
-        throw new Error('Constructor called as a function');
-    }
-    var that = this;
-
-    that.getSymbol = function() {
-      return symbol;
-    };
-    that.getName = function() {
-      return name;
-    };
-    that.getValence = function() {
-      return valence;
-    };
-    that.getFormulaWeight = function() {
-      return formulaWeight;
-    };
-    that.getMeqL = function(concMgL) {
-      return concMgL * Math.abs(that.getValence()) / that.getFormulaWeight()
-    };
-  };
-
-  UQ3DWA.IonFactory = new (function() {
-    var that = this;
-
-    var ions = [
-      new UQ3DWA.Ion('Ca', 'Calcium', 2, 40.078),
-      new UQ3DWA.Ion('Mg', 'Magnesium', 2, 24.305),
-      new UQ3DWA.Ion('Na', 'Sodium', 1, 22.98976928),
-      new UQ3DWA.Ion('K', 'Potassium', 1, 39.0983),
-      new UQ3DWA.Ion('Cl', 'Chloride', -1, 35.45),
-      new UQ3DWA.Ion('SO4', 'Sulfate', -2, 32.066 + 15.999 * 4),
-      new UQ3DWA.Ion('CO3', 'Carbonate', -2, 12.011 + 15.999 * 3),
-      new UQ3DWA.Ion('HCO3', 'Bicarbonate', -1, 1.008 + 12.011 + 15.999 * 3)
-    ];
-
-    that.get = function(symbol) {
-      var matches = ions.filter(function(ion) {return ion.getSymbol() == symbol;});
-      return (matches.length > 0) ? matches[0] : null;
-    };
-  })();
 
   /**
    * @constructor
@@ -85,7 +30,7 @@
     var triangleWidth = 300;
     var triangleTranslateY = 350;
     var triangleBaseY = triangleWidth;
-    var triangleHeight = (Math.tan(deg2rad(60)) * (triangleWidth / 2));
+    var triangleHeight = (Math.tan(Math.PI / 3) * (triangleWidth / 2));
     var triangleCentreMargin = 50;
 
     // We use a for-loop to create one set of grid lines fitting a triangle;
@@ -101,7 +46,7 @@
         var x1 = i * gridIntervalWidth;
         var y1 = triangleBaseY;
         var x2 = x1 + ((triangleWidth - x1) / 2);
-        var y2 = y1 - Math.tan(deg2rad(60)) * (x2 - x1);
+        var y2 = y1 - Math.tan(Math.PI / 3) * (x2 - x1);
         var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('class', 'grid');
         path.setAttribute('d', 'M ' + x1 + ',' + y1 + ' ' + 'L ' + x2 + ',' + y2);
@@ -121,7 +66,7 @@
       })();
       if (rotation != 0) (function() {
         var cx = triangleWidth / 2;
-        var cy = triangleBaseY - (Math.tan(deg2rad(30)) * (triangleWidth / 2));
+        var cy = triangleBaseY - (Math.tan(Math.PI / 6) * (triangleWidth / 2));
         transforms.push('rotate(' + rotation + ' ' + cx + ' ' + cy + ')');
       })();
       if (transforms.length > 0) {
@@ -131,11 +76,11 @@
     }
 
     var axisLabelMargin = 20;
-    var leftAxisLabelMarginX = Math.cos(deg2rad(30)) * axisLabelMargin;
-    var leftAxisLabelX = ((Math.cos(deg2rad(60)) * triangleWidth) / 2) - leftAxisLabelMarginX;
+    var leftAxisLabelMarginX = Math.cos(Math.PI / 6) * axisLabelMargin;
+    var leftAxisLabelX = ((Math.cos(Math.PI / 3) * triangleWidth) / 2) - leftAxisLabelMarginX;
     var rightAxisLabelX = triangleWidth - leftAxisLabelX;
-    var topAxisLabelMarginY = Math.sin(deg2rad(30)) * axisLabelMargin;
-    var topAxisLabelY = triangleBaseY - ((Math.sin(deg2rad(60)) * triangleWidth) / 2) - topAxisLabelMarginY;
+    var topAxisLabelMarginY = Math.sin(Math.PI / 6) * axisLabelMargin;
+    var topAxisLabelY = triangleBaseY - ((Math.sin(Math.PI / 3) * triangleWidth) / 2) - topAxisLabelMarginY;
     var bottomAxisLabelY = (2 * triangleBaseY) - topAxisLabelY;
     function createAxisLabel(parentElem, x, y, rotation, text) {
       var textElem = document.createElementNS('http://www.w3.org/2000/svg', 'text');
@@ -153,7 +98,7 @@
     // of the diamond and the nearby points of both triangles.
     var diamondFieldTranslateY =
       (triangleTranslateY + triangleBaseY)             // start at base of triangle
-      - (Math.tan(deg2rad(60)) * triangleCentreMargin) // go up height of "margin" triangle
+      - (Math.tan(Math.PI / 3) * triangleCentreMargin) // go up height of "margin" triangle
       - triangleHeight                                 // go up height of diamond bottom half triangle
       - triangleBaseY;                                 // go up height of sqaure enclosing top half of diamond
     (function createDiamondField() {
@@ -271,20 +216,20 @@
         circle.setAttribute('cy', y);
         piper.appendChild(circle);
       }
-      var cationOffsetY = Math.sin(deg2rad(60)) * proportion['Mg'] * triangleWidth;
+      var cationOffsetY = Math.sin(Math.PI / 3) * proportion['Mg'] * triangleWidth;
       var cationBaseOffsetX = (1 - proportion['Ca']) * triangleWidth;
-      var cationOffsetX = cationBaseOffsetX - (cationOffsetY / Math.tan(deg2rad(60)));
+      var cationOffsetX = cationBaseOffsetX - (cationOffsetY / Math.tan(Math.PI / 3));
       createDataPoint(cationTranslateX + cationOffsetX, triangleTranslateY + triangleBaseY - cationOffsetY);
 
-      var anionOffsetY = Math.sin(deg2rad(60)) * proportion['SO4'] * triangleWidth;
+      var anionOffsetY = Math.sin(Math.PI / 3) * proportion['SO4'] * triangleWidth;
       var anionBaseOffsetX = proportion['Cl'] * triangleWidth;
-      var anionOffsetX = anionBaseOffsetX - (anionOffsetY / Math.tan(deg2rad(60)));
+      var anionOffsetX = anionBaseOffsetX - (anionOffsetY / Math.tan(Math.PI / 3));
       createDataPoint(anionTranslateX + anionOffsetX, triangleTranslateY + triangleBaseY - anionOffsetY);
 
-      var a = cationBaseOffsetX - ((cationOffsetY / Math.tan(deg2rad(60))) * 2);
+      var a = cationBaseOffsetX - ((cationOffsetY / Math.tan(Math.PI / 3)) * 2);
       var b = anionBaseOffsetX;
       var diamondPointOffsetX = (a + b) / 2;
-      var diamondPointOffsetY = Math.tan(deg2rad(60)) * ((diamondPointOffsetX + (triangleWidth / 2)) - a);
+      var diamondPointOffsetY = Math.tan(Math.PI / 3) * ((diamondPointOffsetX + (triangleWidth / 2)) - a);
       createDataPoint(
         diamondFieldTranslateX + diamondPointOffsetX,
         diamondFieldTranslateY + triangleBaseY + triangleHeight - diamondPointOffsetY
