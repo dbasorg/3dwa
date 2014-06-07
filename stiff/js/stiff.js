@@ -2,7 +2,7 @@
   /**
    * @constructor
    * @param {string} id - id for container element.
-   * @param {string[]} ions - array of ion symbols (e.g. 'Na', 'Ca', 'Mg', 'K', 'Cl', 'HCO3', 'SO4', 'CO3').
+   * @param {string[][]} ions - ion symbol groups (e.g. [['Na', 'K'], ['Ca'], ['Mg'], ['Cl'], ['HCO3', 'CO3'], ['SO4']]).
    * @param {Object.<string, number>} conc - Object with ion symbols as keys and concentrations in mg/L as values.
    */
   UQ3DWA.StiffDiagram = function(id, ions, conc) {
@@ -11,14 +11,17 @@
     }
     var that = this;
 
-    var ionObj = ions.reduce(function(a, sym) {a[sym] = UQ3DWA.IonFactory.get(sym); return a;}, {});
-    var cations = ions.filter(function(sym) {return ionObj[sym].getValence() > 0;});
-    var anions = ions.filter(function(sym) {return ionObj[sym].getValence() < 0;});
-    var meqL = ions.reduce(function(a, sym) {a[sym] = ionObj[sym].getMeqL(conc[sym]); return a;}, {});
-    var maxMeqL = Object.keys(meqL).reduce(function(a, k) {return Math.max(a, meqL[k]);}, 0);
+    var ionGroups = ions.map(function(syms) {
+      var ionObjs = syms.map(function(sym) {return UQ3DWA.IonFactory.get(sym);});
+      var meqL = ionObjs.reduce(function(a, ion) {return a + ion.getMeqL(conc[ion.getSymbol()]);}, 0);
+      return {ions: ionObjs, meqL: meqL};
+    });
+    var cationGroups = ionGroups.filter(function(ionGroup) {return ionGroup.ions[0].getValence() > 0;});
+    var anionGroups = ionGroups.filter(function(ionGroup) {return ionGroup.ions[0].getValence() < 0;});
+    var maxMeqL = ionGroups.reduce(function(a, ionGroup) {return Math.max(a, ionGroup.meqL);}, 0);
 
     var svgNamespaceURI = 'http://www.w3.org/2000/svg';
-    var stiffWidth = 500;
+    var stiffWidth = 600;
     var stiffHeight = 500;
     var horzAxisWidth = 175; // width of one side: multiply by 2 for total width of symmetrical axis
     var horzAxisY = 120;
@@ -110,14 +113,14 @@
     function pointCreator(horzMult) {
       var vertAxisPaddedOffsetY = horzAxisY + (vertAxisPaddingTop * vertAxisHeight);
       var vertAxisInnerHeight = vertAxisHeight * (1 - vertAxisPaddingTop - vertAxisPaddingBottom);
-      return function(sym, i) {
-        var x = vertAxisX + horzMult * horzAxisWidth * (meqL[sym] / maxMeqL);
-        var y = vertAxisPaddedOffsetY + i * (vertAxisInnerHeight / (Math.max(cations.length, anions.length) - 1));
+      return function(ionGroup, i) {
+        var x = vertAxisX + horzMult * horzAxisWidth * (ionGroup.meqL / maxMeqL);
+        var y = vertAxisPaddedOffsetY + i * (vertAxisInnerHeight / (Math.max(cationGroups.length, anionGroups.length) - 1));
         return [x, y];
       }
     }
-    var cationPoints = cations.map(pointCreator(-1));
-    var anionPoints = anions.map(pointCreator(1));
+    var cationPoints = cationGroups.map(pointCreator(-1));
+    var anionPoints = anionGroups.map(pointCreator(1));
 
     (function createPolygon() {
       var polygon = document.createElementNS(svgNamespaceURI, 'polygon');
@@ -131,8 +134,8 @@
       stiff.appendChild(polygon);
     })();
 
-    function createIonLabels(syms, points, horzMult) {
-      syms.forEach(function(sym, i) {
+    function createIonLabels(ionGroups, points, horzMult) {
+      ionGroups.forEach(function(ionGroup, i) {
         var x = points[i][0] + horzMult * pointLabelOffsetX;
         var y = points[i][1] + pointLabelOffsetY;
         var textElem = document.createElementNS(svgNamespaceURI, 'text');
@@ -140,12 +143,12 @@
         textElem.setAttribute('style', 'text-anchor: ' + ((horzMult < 0) ? 'end' : 'start') + ';');
         textElem.setAttribute('x', x);
         textElem.setAttribute('y', y);
-        textElem.appendChild(new Text(sym));
+        textElem.appendChild(new Text(ionGroup.ions.map(function (ion) {return ion.getSymbol();}).join(' + ')));
         stiff.appendChild(textElem);
       });
     }
-    createIonLabels(cations, cationPoints, -1);
-    createIonLabels(anions, anionPoints, 1);
+    createIonLabels(cationGroups, cationPoints, -1);
+    createIonLabels(anionGroups, anionPoints, 1);
 
     var container = document.getElementById(id);
     container.appendChild(stiff);
