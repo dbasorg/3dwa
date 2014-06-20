@@ -1,7 +1,10 @@
 .piper {background-color: white; border: 1px solid darkgray; font-family: sans-serif; font-size: 16px;}
-.piper path {stroke-linecap: round; stroke-linejoin: round;}
+.piper path, .piper rect {stroke-linecap: round; stroke-linejoin: round;}
 .piper .diamond, .triangle {fill: none;}
-.piper .outline {stroke: #333; stroke-width: 3px;}
+.piper .outline, .piper .legend-border {stroke: #333; fill: none;}
+.piper .outline {stroke-width: 3px;}
 .piper .grid {stroke: #ddd; stroke-width: 2px;}
 .piper .axis-label {text-anchor: middle; alignment-baseline: middle; fill: #333; font-weight: bold;}
 .piper .data-point {stroke: none;}
+.piper .legend-border {stroke-width: 2px;}
+.piper .legend-label {font-size: 13px;}

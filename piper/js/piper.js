@@ -2,11 +2,26 @@
   /**
    * @constructor
    * @param {string} id - id for container element.
-   * @param {Object.<string, number>[]} concs -
-   *   Array of objects with cation/anion chemical symbols as keys
-   *   (Ca, Mg, Na, K, Cl, SO4, CO3, HCO3) and concentrations in mg/L as values.
+   * @param {Object[]} groups -
+   *   Array of group objects, each having a name and an array of concentration sets.
+   *   Concentration sets are denoted as objects with cation/anion chemical symbols as
+   *   keys (Ca, Mg, Na, K, Cl, SO4, CO3, HCO3) and concentrations in mg/L as values.
+   *
+   *   Example:
+   *
+   *     [
+   *       {
+   *         name: 'Well 123456',
+   *         values: [
+   *           {'Ca': 61, 'Mg':  43, 'Na': 475, 'K': 1, 'Cl': 740, 'SO4':  10, 'CO3': 0.6, 'HCO3': 386},
+   *           {'Ca': 14, 'Mg': 6.9, 'Na':  25, 'K': 4, 'Cl':  26, 'SO4': 4.6, 'CO3': 0.4, 'HCO3': 106},
+   *           ...
+   *         ]
+   *       },
+   *       ...
+   *     ]
    */
-  UQ3DWA.PiperDiagram = function(id, concs) {
+  UQ3DWA.PiperDiagram = function(id, groups) {
     if (!(this instanceof UQ3DWA.PiperDiagram)) {
         throw new Error('Constructor called as a function');
     }
@@ -27,6 +42,11 @@
     var numGridIntervals = 10;
     var axisLabelMargin = 20;
     var pointRadius = 5;
+    var legendRowHeight = 15;
+    var legendX = piperWidth * 0.73;
+    var legendY = 30;
+    var legendWidth = piperWidth - legendX - legendY;
+    var legendHeight = legendRowHeight * groups.length + 7;
 
     var piper = document.createElementNS(svgNamespaceURI, 'svg');
     piper.setAttribute('class','piper');
@@ -191,7 +211,17 @@
     createTriangleChart('cation', cationTranslateX, triangleTranslateY, 'Mg →', 'Na + K →', '← Ca');
     createTriangleChart('anion', anionTranslateX, triangleTranslateY, '← CO3 + HCO3', '← SO4', 'Cl →');
 
-    function plotConcentrations(conc) {
+    function createDataPoint(x, y, color) {
+      var circle = document.createElementNS(svgNamespaceURI, 'circle');
+      circle.setAttribute('class', 'data-point');
+      circle.setAttribute('fill', color);
+      circle.setAttribute('r', pointRadius);
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      piper.appendChild(circle);
+    }
+
+    function plotConcentrations(conc, color) {
       var ionObj = ions.reduce(function(a, sym) {a[sym] = UQ3DWA.IonFactory.get(sym); return a;}, {});
       var cations = ions.filter(function(sym) {return ionObj[sym].getValence() > 0;});
       var anions = ions.filter(function(sym) {return ionObj[sym].getValence() < 0;});
@@ -204,26 +234,15 @@
       cations.reduce(function(a, sym) {a[sym] = meqL[sym] / cationTotal; return a;}, proportion);
       anions.reduce(function(a, sym) {a[sym] = meqL[sym] / anionTotal; return a;}, proportion)
 
-      var color = 'hsl(' + Math.random() * 360 + ', 100%, 45%)';
-
-      function createDataPoint(x, y) {
-        var circle = document.createElementNS(svgNamespaceURI, 'circle');
-        circle.setAttribute('class', 'data-point');
-        circle.setAttribute('fill', color);
-        circle.setAttribute('r', pointRadius);
-        circle.setAttribute('cx', x);
-        circle.setAttribute('cy', y);
-        piper.appendChild(circle);
-      }
       var cationOffsetY = Math.sin(Math.PI / 3) * proportion['Mg'] * triangleWidth;
       var cationBaseOffsetX = (1 - proportion['Ca']) * triangleWidth;
       var cationOffsetX = cationBaseOffsetX - (cationOffsetY / Math.tan(Math.PI / 3));
-      createDataPoint(cationTranslateX + cationOffsetX, triangleTranslateY + triangleBaseY - cationOffsetY);
+      createDataPoint(cationTranslateX + cationOffsetX, triangleTranslateY + triangleBaseY - cationOffsetY, color);
 
       var anionOffsetY = Math.sin(Math.PI / 3) * proportion['SO4'] * triangleWidth;
       var anionBaseOffsetX = proportion['Cl'] * triangleWidth;
       var anionOffsetX = anionBaseOffsetX - (anionOffsetY / Math.tan(Math.PI / 3));
-      createDataPoint(anionTranslateX + anionOffsetX, triangleTranslateY + triangleBaseY - anionOffsetY);
+      createDataPoint(anionTranslateX + anionOffsetX, triangleTranslateY + triangleBaseY - anionOffsetY, color);
 
       var a = cationBaseOffsetX - ((cationOffsetY / Math.tan(Math.PI / 3)) * 2);
       var b = anionBaseOffsetX;
@@ -231,12 +250,39 @@
       var diamondPointOffsetY = Math.tan(Math.PI / 3) * ((diamondPointOffsetX + (triangleWidth / 2)) - a);
       createDataPoint(
         diamondFieldTranslateX + diamondPointOffsetX,
-        diamondFieldTranslateY + triangleBaseY + triangleHeight - diamondPointOffsetY
+        diamondFieldTranslateY + triangleBaseY + triangleHeight - diamondPointOffsetY,
+        color
       );
     }
-    concs.forEach(function(conc) {
-      plotConcentrations(conc);
+    function getGroupColor(i) {
+      return 'hsl(' + ((54 * i++) % 360) + ', 100%, 45%)';
+    }
+    groups.forEach(function(group, i) {
+      var color = getGroupColor(i);
+      group.values.forEach(function(conc) {
+        plotConcentrations(conc, color);
+      });
     });
+
+    (function createLegend() {
+      var legendBorder = document.createElementNS(svgNamespaceURI, 'rect');
+      legendBorder.setAttribute('class', 'legend-border');
+      legendBorder.setAttribute('x', legendX);
+      legendBorder.setAttribute('y', legendY);
+      legendBorder.setAttribute('width', legendWidth);
+      legendBorder.setAttribute('height', legendHeight);
+      piper.appendChild(legendBorder);
+
+      groups.forEach(function(group, i) {
+        createDataPoint(legendX + 14, legendY + legendRowHeight * (i + 0.5) + 4, getGroupColor(i));
+        var legendLabel = document.createElementNS(svgNamespaceURI, 'text');
+        legendLabel.setAttribute('class', 'legend-label');
+        legendLabel.setAttribute('x', legendX + 25);
+        legendLabel.setAttribute('y', legendY + legendRowHeight * (i + 1));
+        legendLabel.appendChild(new Text(group.name));
+        piper.appendChild(legendLabel);
+      });
+    })();
 
     var container = document.getElementById(id);
     container.appendChild(piper);
