@@ -40,10 +40,9 @@
     var valenceLabelMarginBottom = 20;
 
     var stiff = document.createElementNS(svgNamespaceURI, 'svg');
-    stiff.setAttribute('class','stiff');
-    stiff.setAttribute('width', stiffWidth);
-    stiff.setAttribute('height', stiffHeight);
     stiff.setAttribute('xmlns', svgNamespaceURI);
+    stiff.setAttribute('class','stiff');
+    stiff.setAttribute('viewBox', [0, 0, stiffWidth, stiffHeight].join(' '));
 
     (function createHorzAxis() {
       var horzAxis = document.createElementNS(svgNamespaceURI, 'path');

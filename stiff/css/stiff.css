@@ -1,4 +1,4 @@
-.stiff {background-color: white; border: 1px solid darkgray; font-family: sans-serif; font-size: 16px;}
+.stiff {font-family: sans-serif; font-size: 16px;}
 .stiff path, .stiff polygon {stroke-linecap: round; stroke-linejoin: round;}
 .stiff text {fill: #333;}
 .stiff .axis, .stiff .axis-tick, .stiff .polygon {stroke: #333; stroke-width: 2px;}

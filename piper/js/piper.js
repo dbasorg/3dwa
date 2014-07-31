@@ -49,11 +49,10 @@
     var legendHeight = legendRowHeight * groups.length + 7;
 
     var piper = document.createElementNS(svgNamespaceURI, 'svg');
-    piper.setAttribute('class','piper');
-    piper.setAttribute('width', piperWidth);
-    piper.setAttribute('height', piperHeight);
     piper.setAttribute('xmlns', svgNamespaceURI);
     piper.setAttribute('xmlns:xlink', xlinkNamespaceURI);
+    piper.setAttribute('class','piper');
+    piper.setAttribute('viewBox', [0, 0, piperWidth, piperHeight].join(' '));
 
     // We use a for-loop to create one set of grid lines fitting a triangle;
     // arbitrarily, this is the set drawn from the base upward to the right side;
