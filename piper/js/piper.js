@@ -51,7 +51,9 @@
     var piper = document.createElementNS(svgNamespaceURI, 'svg');
     piper.setAttribute('xmlns', svgNamespaceURI);
     piper.setAttribute('xmlns:xlink', xlinkNamespaceURI);
-    piper.setAttribute('class','piper');
+    piper.setAttribute('class', 'piper');
+    piper.setAttribute('width', '100%');
+    piper.setAttribute('height', '100%');
     piper.setAttribute('viewBox', [0, 0, piperWidth, piperHeight].join(' '));
 
     // We use a for-loop to create one set of grid lines fitting a triangle;

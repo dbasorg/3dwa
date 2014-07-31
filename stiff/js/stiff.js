@@ -41,7 +41,9 @@
 
     var stiff = document.createElementNS(svgNamespaceURI, 'svg');
     stiff.setAttribute('xmlns', svgNamespaceURI);
-    stiff.setAttribute('class','stiff');
+    stiff.setAttribute('class', 'stiff');
+    stiff.setAttribute('width', '100%');
+    stiff.setAttribute('height', '100%');
     stiff.setAttribute('viewBox', [0, 0, stiffWidth, stiffHeight].join(' '));
 
     (function createHorzAxis() {
